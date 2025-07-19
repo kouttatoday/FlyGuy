@@ -1,54 +1,44 @@
+-- Square Drawing Script for Roblox
 
-local Player = game.Players.LocalPlayer
-local Character = Player.Character or Player.CharacterAdded:Wait()
-local Humanoid = Character:WaitForChild("Humanoid")
-local RootPart = Character:WaitForChild("HumanoidRootPart")
+local Drawing = Drawing.new("Square")
+Drawing.Size = UDim2.new(0, 100, 0, 100)  -- Size of the square (100x100 pixels)
+Drawing.Position = UDim2.new(0.5, -50, 0.5, -50)  -- Center the square on the screen
+Drawing.Color = Color3.new(1, 0, 0)  -- Red color
+Drawing.Thickness = 2  -- Border thickness
+Drawing.Filled = true  -- Fill the square
+Drawing.Visible = true  -- Make the square visible
 
-local flySpeed = 50
-local flyKey = Enum.KeyCode.E 
-local jumpKey = Enum.KeyCode.Space
+-- Optional: Add a transparency effect
+Drawing.Transparency = 1  -- 1 is fully transparent, 0 is fully opaque
+Drawing.Transparency = 0.5  -- 50% transparency
 
-local flying = false
-local flyForce = Instance.new("BodyVelocity")
-local flyBodyGyro = Instance.new("BodyGyro")
+-- Optional: Add a drag functionality to move the square
+local dragging = false
+local dragInput, mousePos, offset = nil, nil, nil
 
-flyForce.Parent = RootPart
-flyBodyGyro.Parent = RootPart
+Drawing.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        mousePos = input.Position
+        offset = UDim2.new(startingPosition.X.Scale, startingPosition.X.Offset - mousePos.X, startingPosition.Y.Scale, startingPosition.Y.Offset - mousePos.Y)
+    end
+end)
 
-game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
-    if input.KeyCode == flyKey then
-        flying = not flying
-        if flying then
-            flyForce.Velocity = Vector3.new(0, 0, 0)
-            flyBodyGyro.maxTorque = Vector3.new(0, 0, 0)
-            flyBodyGyro.P = 9e4
-            flyForce.maxForce = Vector3.new(4000, 4000, 4000)
-            flyForce.velocity = Vector3.new(0, 0, 0)
-        else
-            flyForce:Destroy()
-            flyBodyGyro:Destroy()
-        end
-    elseif input.KeyCode == jumpKey and flying then
-        flyForce.Velocity = Vector3.new(0, 50, 0)
+Drawing.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        dragInput = input
+    end
+end)
+
+game:GetService("UserInputService").InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
     end
 end)
 
 game:GetService("RunService").RenderStepped:Connect(function()
-    if flying then
-        local moveVector = Vector3.new(0, 0, 0)
-        if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.W) then
-            moveVector = moveVector + (workspace.CurrentCamera.CoordinateFrame.lookVector * flySpeed)
-        end
-        if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.S) then
-            moveVector = moveVector - (workspace.CurrentCamera.CoordinateFrame.lookVector * flySpeed)
-        end
-        if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.A) then
-            moveVector = moveVector - (workspace.CurrentCamera.CoordinateFrame.rightVector * flySpeed)
-        end
-        if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.D) then
-            moveVector = moveVector + (workspace.CurrentCamera.CoordinateFrame.rightVector * flySpeed)
-        end
-        flyForce.Velocity = moveVector
+    if dragging and dragInput then
+        local delta = dragInput.Position - mousePos
+        Drawing.Position = UDim2.new(startingPosition.X.Scale, startingPosition.X.Offset + delta.X, startingPosition.Y.Scale, startingPosition.Y.Offset + delta.Y)
     end
 end)
