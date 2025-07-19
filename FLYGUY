@@ -1,4 +1,3 @@
--- Fly Exploit Script for Roblox
 
 local Player = game.Players.LocalPlayer
 local Character = Player.Character or Player.CharacterAdded:Wait()
@@ -6,7 +5,7 @@ local Humanoid = Character:WaitForChild("Humanoid")
 local RootPart = Character:WaitForChild("HumanoidRootPart")
 
 local flySpeed = 50
-local flyKey = Enum.KeyCode.E  -- Change this to the key you want to use for flying
+local flyKey = Enum.KeyCode.E 
 local jumpKey = Enum.KeyCode.Space
 
 local flying = false
