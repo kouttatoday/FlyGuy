@@ -1,0 +1,55 @@
+-- Fly Exploit Script for Roblox
+
+local Player = game.Players.LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
+local RootPart = Character:WaitForChild("HumanoidRootPart")
+
+local flySpeed = 50
+local flyKey = Enum.KeyCode.E  -- Change this to the key you want to use for flying
+local jumpKey = Enum.KeyCode.Space
+
+local flying = false
+local flyForce = Instance.new("BodyVelocity")
+local flyBodyGyro = Instance.new("BodyGyro")
+
+flyForce.Parent = RootPart
+flyBodyGyro.Parent = RootPart
+
+game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == flyKey then
+        flying = not flying
+        if flying then
+            flyForce.Velocity = Vector3.new(0, 0, 0)
+            flyBodyGyro.maxTorque = Vector3.new(0, 0, 0)
+            flyBodyGyro.P = 9e4
+            flyForce.maxForce = Vector3.new(4000, 4000, 4000)
+            flyForce.velocity = Vector3.new(0, 0, 0)
+        else
+            flyForce:Destroy()
+            flyBodyGyro:Destroy()
+        end
+    elseif input.KeyCode == jumpKey and flying then
+        flyForce.Velocity = Vector3.new(0, 50, 0)
+    end
+end)
+
+game:GetService("RunService").RenderStepped:Connect(function()
+    if flying then
+        local moveVector = Vector3.new(0, 0, 0)
+        if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.W) then
+            moveVector = moveVector + (workspace.CurrentCamera.CoordinateFrame.lookVector * flySpeed)
+        end
+        if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.S) then
+            moveVector = moveVector - (workspace.CurrentCamera.CoordinateFrame.lookVector * flySpeed)
+        end
+        if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.A) then
+            moveVector = moveVector - (workspace.CurrentCamera.CoordinateFrame.rightVector * flySpeed)
+        end
+        if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.D) then
+            moveVector = moveVector + (workspace.CurrentCamera.CoordinateFrame.rightVector * flySpeed)
+        end
+        flyForce.Velocity = moveVector
+    end
+end)
